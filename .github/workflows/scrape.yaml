@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
           body: "Please find attached the latest voting intentions."
-          from: rmercad1@umd.edu
+          from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |
             ./path/to/voting_intentions.csv
