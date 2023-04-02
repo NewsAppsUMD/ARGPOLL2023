@@ -1,8 +1,12 @@
 name: Daily Voting Intentions
 
 on:
-  schedule:
-    - cron: '0 0 * * *' # run every day at midnight
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   scrape_and_email:
@@ -37,10 +41,10 @@ jobs:
             ./path/to/voting_intentions.csv
 
       - name: Commit and push changes
+        if: always()
         run: |
           git config --global user.name "Your Name"
           git config --global user.email "you@example.com"
           git add .
           git commit -m "Update voting intentions"
           git push
-
