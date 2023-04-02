@@ -1,0 +1,46 @@
+name: Daily Voting Intentions
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # run every day at midnight
+
+jobs:
+  scrape_and_email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests bs4 pandas
+
+      - name: Scrape data and save to CSV
+        run: python scrapers/wikitable/scrape.py
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3.3.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Voting Intentions"
+          body: "Please find attached the latest voting intentions."
+          to: mercadoryan94@gmail.com
+          attachments: |
+            ./path/to/voting_intentions.csv
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "you@example.com"
+          git add .
+          git commit -m "Update voting intentions"
+          git push
+
