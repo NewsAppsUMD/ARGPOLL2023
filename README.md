@@ -10,4 +10,6 @@ Again, thanks to Chat GPT for generating the YAML code, it is a good one, howeve
 The only problem is that the email that is being sent includes the CSV and is not an Email that would take the CSV results and give it to you in words in an email. Can YAML do that? But can CSV data be made turned into an email format thats understandable? That I still need to figure out. 
 If you have any tips on how to help with emails and passwords, that is very much appreciated. I already setup my email in github repository secrets so thats there. I guess because I am using a google email that github actions is having trouble?
 
+Test
+
 <End of update>
