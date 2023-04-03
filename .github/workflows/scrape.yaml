@@ -39,7 +39,7 @@ jobs:
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |
-            ./path/to/voting_intentions.csv
+            ./scrapers/wikitable/voting_intentions.csv
 
       - name: Commit and push changes
         if: always()
