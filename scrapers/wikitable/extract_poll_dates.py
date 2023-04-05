@@ -1,21 +1,31 @@
-import csv
+import pandas as pd
 import datetime
+import os
 
-# get the current year and month
-now = datetime.datetime.now()
-year = now.year
-month = now.month
 
-# read the CSV file and extract the poll dates for the current month
-with open('voting_intentions.csv', mode='r') as file:
-    reader = csv.reader(file)
-    header = next(reader)
+def extract_poll_dates(data_dir):
+    # Read the CSV file
+    df = pd.read_csv(os.path.join(data_dir, 'voting_intentions.csv'))
+
+    # Get the unique poll dates for the current month
+    curr_month = datetime.date.today().month
     poll_dates = set()
-    for row in reader:
-        date_str = row[0]
-        date = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-        if date.year == year and date.month == month:
-            poll_dates.add(date_str)
 
-# print the poll dates for the current month
-print(poll_dates)
+    for i, row in df.iterrows():
+        date_str = row['Fieldwork date']
+        if not pd.isna(date_str) and date_str != '':
+            date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+            if date.month == curr_month:
+                poll_dates.add(date.strftime('%Y-%m-%d'))
+
+    # Return the poll dates as a string
+    return ', '.join(sorted(list(poll_dates)))
+
+
+if __name__ == '__main__':
+    # Get the path to the data directory from the environment variable
+    data_dir = os.getenv('DATA_DIR')
+
+    # Extract the poll dates and print them to stdout
+    poll_dates = extract_poll_dates(data_dir)
+    print(f'::set-output name=poll_dates::{poll_dates}')
