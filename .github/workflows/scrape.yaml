@@ -22,34 +22,33 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests bs4 pandas
+        run: pip install requests bs4 pandas jinja2 beautifulsoup4
 
-      - name: Scrape data and save to CSV
+      - name: Scrape data and generate HTML table
         run: python scrapers/wikitable/scrape.py
 
-      - name: Parse CSV and send email
+      - name: Send email
         uses: dawidd6/action-send-mail@v3.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EMAIL: ${{ secrets.EMAIL }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         with:
           server_address: smtp.gmail.com
           server_port: 587
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
-          from: "Ryan's Election Bot <mercadoryan94@gmail.com>"
-          to: "mercadoryan94@gmail.com"
+          from: mercadoryan94@gmail.com
+          to: mercadoryan94@gmail.com
           body: |
-            Hello,
+            <p>Hello,</p>
+            <p>Enclosed you will find the latest polling results for the 2023 Argentine General Election:</p>
+            {{ table_html }}
+          env:
+            table_html: ${{ steps.generate_html.outputs.html }}
 
-            Enclosed you will find the latest polling results for the 2023 Argentine General Election.
-
-            | Polling Firm | Date       | Party         | % Approval |
-            |--------------|------------|---------------|------------|
-            {% for poll in polls %}
-            | {{ poll['Polling firm'] }} | {{ poll['Date'] }} | {{ poll['Party'] }} | {{ poll['%'] }} |
-            {% endfor %}
-          attachments: |
-            ./scrapers/wikitable/voting_intentions.csv
+      - name: Commit and push changes
+        if: always()
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "you@example.com"
+          git add .
+          git commit -m "Update voting intentions"
+          git push

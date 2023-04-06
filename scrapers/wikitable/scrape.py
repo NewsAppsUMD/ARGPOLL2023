@@ -1,19 +1,18 @@
-import os
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+import csv
+import pandas as pd
+import datetime
+import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-import smtplib
+from email.mime.application import MIMEApplication
 
-# set up email parameters
-EMAIL = os.environ.get('EMAIL')
-EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+# Get current month and year
+now = datetime.datetime.now()
+current_month = now.strftime("%B")
+current_year = now.strftime("%Y")
 
-# scrape polling data from Wikipedia
 url = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2023_Argentine_general_election#By_political_party_2023"
 response = requests.get(url)
 soup = BeautifulSoup(response.content, 'html.parser')
@@ -34,57 +33,55 @@ for th in rows[0].find_all('th'):
 pollster_index = headers.index("Pollster")
 headers[pollster_index] = "Polling firm"
 
-# create dictionary to store poll results
-polls = {}
-
-# extract table data and update dictionary
+# extract table data and filter for current month
+polling_data = []
 for row in rows[1:]:
-    poll_date = row.find('th').text.strip()
-    poll_date = datetime.strptime(poll_date, '%d %B %Y').date()
-    if poll_date.month == datetime.today().month: # check if poll date is in current month
-        if poll_date not in polls:
-            polls[poll_date] = {header: '' for header in headers[1:]} # initialize poll results with empty strings
-        for i, td in enumerate(row.find_all('td')):
-            polls[poll_date][headers[i+1]] = td.text.strip()
+    row_data = []
+    date = row.find('th').text.strip()
+    date_obj = datetime.datetime.strptime(date, '%d %B %Y')
+    if date_obj.month == now.month and date_obj.year == now.year:
+        row_data.append(date)
+        for td in row.find_all('td'):
+            if td.find('a'):
+                row_data.append(td.find('a').get('title', td.text.strip()))
+            else:
+                row_data.append(td.text.strip())
+        polling_data.append(row_data)
 
-# convert dictionary to DataFrame
-df = pd.DataFrame.from_dict(polls, orient='index')
+# convert polling data to pandas dataframe
+df = pd.DataFrame(polling_data, columns=headers)
 
-# format date column
-df.index = df.index.strftime('%d %B %Y')
+# create HTML table
+html_table = df.to_html(index=False)
 
-# create email message
+# set up email
 msg = MIMEMultipart()
+msg['From'] = 'mercado@ryans.com'
+msg['To'] = 'mercado@ryans.com'
 msg['Subject'] = 'Daily Voting Intentions'
-msg['From'] = 'your_email@example.com'
-msg['To'] = 'recipient_email@example.com'
 
-# create text version of DataFrame
-df_text = df.to_string(index=True)
+# create email body
+body = 'Hello,\n\nEnclosed you will find the latest polling results for the 2023 Argentine General Election.'
 
-# add text to email body
-body = 'Hello,\n\nEnclosed you will find the latest polling results for the 2023 Argentine General Election:\n\n'
-body += df_text
-
-msg.attach(MIMEText(body, 'plain'))
-
-# attach DataFrame as CSV file
-csv_data = df.to_csv(index=True).encode('utf-8')
-part = MIMEBase('application', 'octet-stream')
-part.set_payload(csv_data)
-encoders.encode_base64(part)
-part.add_header('Content-Disposition', 'attachment', filename="poll_data.csv")
+# attach HTML table to email
+part = MIMEText(html_table, 'html')
 msg.attach(part)
 
-# send email with smtplib
-with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.ehlo()
+# attach CSV file to email
+with open('voting_intentions.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(headers)
+    writer.writerows(polling_data)
 
-    smtp.login(EMAIL, EMAIL_PASSWORD)
+with open('voting_intentions.csv', 'rb') as f:
+    attach = MIMEApplication(f.read(),_subtype="csv")
+    attach.add_header('Content-Disposition','attachment',filename=str(current_month)+'_voting_intentions.csv')
+    msg.attach(attach)
 
-    # send email
-    smtp.sendmail(EMAIL, 'recipient_email@example.com', msg.as_string())
-
-print('Email sent!')
+# send email
+server = smtplib.SMTP('smtp.gmail.com', 587)
+server.starttls()
+server.login('mercado@ryans.com', 'password')
+text = msg.as_string()
+server.sendmail(msg['From'], msg['To'], text)
+server.quit()
