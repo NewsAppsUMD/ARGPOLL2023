@@ -24,8 +24,33 @@ jobs:
       - name: Install dependencies
         run: pip install requests bs4 pandas
 
-      - name: Scrape data and generate email body
+      - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
+
+      - name: Extract data from CSV
+        id: extract_data
+        run: |
+          import csv
+          import datetime
+          
+          current_month = datetime.datetime.now().strftime("%B")
+          latest_poll_date = ""
+          voting_intentions = []
+          
+          with open('scrapers/wikitable/voting_intentions.csv', newline='') as csvfile:
+              reader = csv.DictReader(csvfile)
+              for row in reader:
+                  poll_date = datetime.datetime.strptime(row['Date'], '%d %B %Y')
+                  if poll_date.strftime("%B") == current_month:
+                      latest_poll_date = poll_date.strftime("%B %d, %Y")
+                      voting_intentions.append(row)
+          
+          print(f"Latest poll date: {latest_poll_date}")
+          print(f"Voting intentions for current month: {voting_intentions}")
+
+          # Set output variables to be used in the next step
+          print(f"::set-output name=latest_poll_date::{latest_poll_date}")
+          print(f"::set-output name=voting_intentions::{voting_intentions}")
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3.3.0
@@ -35,12 +60,11 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
+          body: "Hello,\n\nEnclosed you will find the latest polling results for the 2023 Argentine General Election. The latest poll was conducted on ${{ steps.extract_data.outputs.latest_poll_date }}.\n\nHere are the voting intentions for the current month:\n\n{% for row in steps.extract_data.outputs.voting_intentions %}- {{ row['Polling firm'] }}: {{ row['Percentage'] }}%\n{% endfor %}"
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |
             ./scrapers/wikitable/voting_intentions.csv
-          body: |
-            $(<email_body.txt)
 
       - name: Commit and push changes
         if: always()
