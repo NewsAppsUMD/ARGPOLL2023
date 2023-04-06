@@ -1,25 +1,37 @@
-import csv
-from datetime import datetime
+name: Daily Voting Intentions
 
-# Set up variables
-results = []
-current_month = datetime.today().strftime('%B')
-headers = []
-pollster_index = 0
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# Open CSV file
-with open('scrapers/wikitable/voting_intentions.csv') as f:
-    reader = csv.reader(f)
-    for i, row in enumerate(reader):
-        if i == 0:
-            headers = row
-            pollster_index = headers.index('Polling firm')
-        else:
-            pollster = row[pollster_index]
-            date_str = row[0]
-            date = datetime.strptime(date_str, '%d %B %Y')
-            if date.strftime('%B') == current_month:
-                results.append(f'{pollster}: {", ".join(row[1:])}')
+jobs:
+  scrape_and_email:
+    runs-on: ubuntu-latest
 
-# Output results as a single string
-print('\n'.join(results))
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests bs4 pandas
+
+      - name: Scrape data and save to CSV
+        run: python scrapers/wikitable/scrape.py
+
+      - name: Extract Data and Send Email
+        run: |
+          cd scrapers/wikitable
+          python extract_data.py
+
+        env:
+          GMAIL_ADDRESS: ${{ secrets.EMAIL }}
+          GMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
