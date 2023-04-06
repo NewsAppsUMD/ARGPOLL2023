@@ -1,3 +1,6 @@
+import os
+os.environ['DISPLAY'] = ':0'
+
 import requests
 from bs4 import BeautifulSoup
 import csv
