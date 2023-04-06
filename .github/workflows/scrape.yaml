@@ -27,11 +27,8 @@ jobs:
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
-      - name: Extract poll dates
-        run: python scrapers/wikitable/extract_poll_dates.py
-        id: poll_dates
-        env:
-          DATA_DIR: ./scrapers/wikitable/
+      - name: Extract data from CSV
+        run: python extract_data.py
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3.3.0
@@ -43,11 +40,11 @@ jobs:
           subject: "Daily Voting Intentions"
           body: |
             Hello,
-            
-            Enclosed you will find the latest polling results for the 2023 Argentine General Election.
-            
-            Poll dates for the current month:
-            ${{ steps.poll_dates.outputs.poll_dates }}
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election. Here are the results for the current month:
+
+            ${{ steps.extract_data.outputs.results }}
+
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |

@@ -1,3 +1,5 @@
+Scrape.py:
+
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -42,4 +44,3 @@ with open('voting_intentions.csv', mode='a', newline='') as file:
             else:
                 data.append(td.text.strip())
         writer.writerow(data)
-
