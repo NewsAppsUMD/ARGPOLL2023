@@ -21,7 +21,7 @@ for th in rows[0].find_all('th'):
         headers.append(th.text.strip())
 
 # find the index of the "Pollster" column and replace it with "Polling firm"
-pollster_index = headers.index("Pollster")
+pollster_index = headers.index("Polling firm")
 headers[pollster_index] = "Polling firm"
 
 # create dictionary to store poll results
