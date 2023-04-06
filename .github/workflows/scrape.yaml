@@ -44,3 +44,9 @@ jobs:
 
       - name: Commit and push changes
         if: always()
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "you@example.com"
+          git add .
+          git commit -m "Update voting intentions"
+          git push
