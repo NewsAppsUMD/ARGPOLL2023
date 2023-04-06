@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: pip install requests bs4 pandas
 
-      - name: Scrape data and save to CSV
+      - name: Scrape data and generate email body
         run: python scrapers/wikitable/scrape.py
 
       - name: Send email
@@ -35,25 +35,12 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
-          body: |
-            Hello,
-
-            Enclosed you will find the latest polling results for the 2023 Argentine General Election:
-
-            | Polling Firm | Date | Party | Percentage |
-            |--------------|------|-------|------------|
-            ${{ steps.parse_csv.outputs.table }}
-
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |
             ./scrapers/wikitable/voting_intentions.csv
+          body: |
+            $(<email_body.txt)
 
       - name: Commit and push changes
         if: always()
-        run: |
-          git config --global user.name "Your Name"
-          git config --global user.email "you@example.com"
-          git add .
-          git commit -m "Update voting intentions"
-          git push
