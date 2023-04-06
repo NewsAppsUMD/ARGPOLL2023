@@ -81,4 +81,4 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
     part = MIMEBase('application', 'octet-stream')
     part.set_payload(csv_data)
     encoders.encode_base64(part)
-    part.add_header('Content-Disposition', '
+    part.add_header('Content-Disposition', 'attachment; filename="arg_polls.csv"')
