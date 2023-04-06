@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  scrape_and_email:
+  extract_and_email:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,33 +22,12 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests bs4 pandas
+        run: pip install requests bs4 pandas google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
 
-      - name: Scrape data and save to CSV
-        run: python scrapers/wikitable/scrape.py
-
-      - name: Extract data from CSV
-        run: python extract_data.py
-
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3.3.0
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Daily Voting Intentions"
-          body: |
-            Hello,
-
-            Enclosed you will find the latest polling results for the 2023 Argentine General Election. Here are the results for the current month:
-
-            ${{ steps.extract_data.outputs.results }}
-
-          from: mercadoryan94@gmail.com
-          to: mercadoryan94@gmail.com
-          attachments: |
-            ./scrapers/wikitable/voting_intentions.csv
+      - name: Extract data and send email
+        run: |
+          cd scrapers/wikitable
+          python extract_data.py
 
       - name: Commit and push changes
         if: always()
@@ -58,3 +37,17 @@ jobs:
           git add .
           git commit -m "Update voting intentions"
           git push
+          
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3.3.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Voting Intentions"
+          body: "Hello, Enclosed you will find the latest polling results for the 2023 Argentine General Election.\n\nHere are the latest results for the current month:\n\n${{ env.current_month_results }}"
+          from: mercadoryan94@gmail.com
+          to: mercadoryan94@gmail.com
+          attachments: |
+            ./scrapers/wikitable/voting_intentions.csv
