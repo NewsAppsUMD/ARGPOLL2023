@@ -22,9 +22,9 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests bs4 pandas jinja2 beautifulsoup4
+        run: pip install requests bs4 pandas
 
-      - name: Scrape data and generate HTML table
+      - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
       - name: Send email
@@ -35,14 +35,19 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
+          body: |
+            Hello,
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election:
+
+            | Polling Firm | Date | Party | Percentage |
+            |--------------|------|-------|------------|
+            ${{ steps.parse_csv.outputs.table }}
+
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
-          body: |
-            <p>Hello,</p>
-            <p>Enclosed you will find the latest polling results for the 2023 Argentine General Election:</p>
-            {{ table_html }}
-          env:
-            table_html: ${{ steps.generate_html.outputs.html }}
+          attachments: |
+            ./scrapers/wikitable/voting_intentions.csv
 
       - name: Commit and push changes
         if: always()
