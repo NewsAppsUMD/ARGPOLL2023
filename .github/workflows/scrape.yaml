@@ -27,25 +27,29 @@ jobs:
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
-      - name: Send email
+      - name: Parse CSV and send email
         uses: dawidd6/action-send-mail@v3.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EMAIL: ${{ secrets.EMAIL }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         with:
           server_address: smtp.gmail.com
           server_port: 587
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
-          body: "Please find attached the latest voting intentions."
-          from: mercadoryan94@gmail.com
-          to: mercadoryan94@gmail.com
+          from: "Ryan's Election Bot <mercadoryan94@gmail.com>"
+          to: "mercadoryan94@gmail.com"
+          body: |
+            Hello,
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election.
+
+            | Polling Firm | Date       | Party         | % Approval |
+            |--------------|------------|---------------|------------|
+            {% for poll in polls %}
+            | {{ poll['Polling firm'] }} | {{ poll['Date'] }} | {{ poll['Party'] }} | {{ poll['%'] }} |
+            {% endfor %}
           attachments: |
             ./scrapers/wikitable/voting_intentions.csv
-
-      - name: Commit and push changes
-        if: always()
-        run: |
-          git config --global user.name "Your Name"
-          git config --global user.email "you@example.com"
-          git add .
-          git commit -m "Update voting intentions"
-          git push
