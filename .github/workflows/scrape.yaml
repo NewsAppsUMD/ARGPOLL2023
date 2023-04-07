@@ -1,30 +1,32 @@
-name: Daily Polling Results
+name: Daily Voting Intentions
 
 on:
-  schedule:
-    - cron: "0 12 * * *"
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  scrape_data:
+  scrape_and_email:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python 3.9
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.x'
+
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install beautifulsoup4
-          pip install pandas
-      - name: Scrape data
-        run: python scraper.py
-      - name: Upload data
-        uses: actions/upload-artifact@v2
-        with:
-          name: voting_intentions
-          path: ./scrapers/wikitable/voting_intentions.csv
+        run: pip install requests bs4 pandas
+
+      - name: Scrape data and save to CSV
+        run: python scrapers/wikitable/scrape.py
+
       - name: Send email
         uses: dawidd6/action-send-mail@v3.3.0
         with:
@@ -33,39 +35,12 @@ jobs:
           username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
-          body: |
-            <html>
-              <body>
-                <p>Hello,</p>
-                <p>Enclosed you will find the latest polling results for the 2023 Argentine General Election:</p>
-                <table>
-                  <tr>
-                    <th>Polling firm</th>
-                    <th>Date</th>
-                    <th>Party A</th>
-                    <th>Party B</th>
-                    <th>Party C</th>
-                  </tr>
-                  <tbody>
-                    {% for row in data %}
-                    <tr>
-                      <td>{{ row.pollster }}</td>
-                      <td>{{ row.date }}</td>
-                      <td>{{ row.party_a }}</td>
-                      <td>{{ row.party_b }}</td>
-                      <td>{{ row.party_c }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
-                <p>Best regards,</p>
-                <p>Ryan Mercado</p>
-              </body>
-            </html>
+          body: "Hello, Enclosed are the latest polling results for the 2023 Argentine General Election. Please remember these results are by political party and not any particular candidate and therefore can be read as citizen's intentions for voting for Congress."
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: |
             ./scrapers/wikitable/voting_intentions.csv
+
       - name: Commit and push changes
         if: always()
         run: |
