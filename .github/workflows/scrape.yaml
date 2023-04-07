@@ -27,8 +27,34 @@ jobs:
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
-      - name: Extract data and format email
-        run: python extract_data_and_send_email.py
+      - name: Read CSV file
+        id: read_csv
+        run: echo "::set-output name=data::$(cat scrapers/wikitable/voting_intentions.csv)"
+
+      - name: Generate table data
+        id: generate_table
+        uses: mxschmitt/action-table-to-markdown@v1
+        with:
+          table: ${{ steps.read_csv.outputs.data }}
+          head: true
+
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3.3.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Voting Intentions"
+          body: |
+            Hello,
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election:
+
+            ${{ steps.generate_table.outputs.markdown }}
+
+          from: mercadoryan94@gmail.com
+          to: mercadoryan94@gmail.com
 
       - name: Commit and push changes
         if: always()
