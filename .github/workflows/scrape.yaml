@@ -29,6 +29,9 @@ jobs:
 
       - name: Send email
         uses: dawidd6/action-send-mail@v3.3.0
+        env:
+          DATA: |
+            $(tail -n 4 ./scrapers/wikitable/voting_intentions.csv | column -t -s ',')
         with:
           server_address: smtp.gmail.com
           server_port: 587
@@ -37,19 +40,27 @@ jobs:
           subject: "Daily Voting Intentions"
           body: |
             Hello,
-
+            
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
-
-            |     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
-            |----------------------|--------|------------|------------|------------|
-            $(tail -n +2 scrapers/wikitable/voting_intentions.csv | sort -r -k2 | awk -F "," 'BEGIN { ORS="\n" } NR<=4 { printf("|   %-20s | %-6s | %10s%% | %10s%% | %10s%% |\n", $1, $2, $3, $4, $5) }')
-
+            
+            <table border="1">
+            <tr>
+              <th>Polling firm</th>
+              <th>Date</th>
+              <th>Party A</th>
+              <th>Party B</th>
+              <th>Party C</th>
+            </tr>
+            ${{ env.DATA }}
+            </table>
+            
             Best regards,
             Ryan Mercado
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
-          attachments: ''
-          
+          attachments: |
+            ./scrapers/wikitable/voting_intentions.csv
+
       - name: Commit and push changes
         if: always()
         run: |
