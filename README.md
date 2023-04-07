@@ -4,6 +4,8 @@ Update: 4/7/2023
 
 FINAL UPDATE :
 
+PLEASE NOTE THAT WHILE GITHUB ACTIONS SAYS THE ACTIONS FAILED, THAT IS NOT CORRECT. THE EMAIL SENDS CORRECTLY. It only has that failiure notification because some of the libraries or actions in the code need to be updated. I tried updating them but that just messes up the code so I left the code as is. 
+
 Here is the final code for the scrapper for the polls. As you saw in the sample email I sent to you, I did achieve some things and mostly got a scrapper and email notification I wanted. My only regrest is I wasn't able to make the bot aestheitically pleasing. 
 
 The CSV that I was able to make is ok, but is isn't perfect. There are some wonky things on there such as the CSV table not taking into account letters with spanish accent marks on them, and outputs them as weird symbols in the CSV. I tried fixing that, but when I did do that, the scraping would not be able to read or output ANY text onto the CSV, so I therefore just left that alone. Please keep in mind that chat GPT was used to craft the scrape.py and YAML codes, to see interactions I had with it, please refer back to the readme.md in the old repository. But suffice to say, it was basically just me posting codes to it, along with error messages and asking it to fix them. If I had any modificiations I would describe them to it and it would add them to the code. That did help with me getting github secrets and connecting my gmail to actually send and recieve those emails sucesfully.  
