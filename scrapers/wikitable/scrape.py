@@ -48,6 +48,7 @@ with open('voting_intentions.csv', mode='a', newline='') as file:
                 data.append(td.text.strip())
 
         # extract date and check if it's in the current month
+        print(data)
         date_str = data[1]
         date = datetime.datetime.strptime(date_str, '%B %d, %Y')
         if date.month == current_month:
