@@ -46,5 +46,8 @@ That is my dream table, and I wasn't able to get it. Don't get me wrong, the CSV
 
 So that is where this bot ends. I accomplished most of what I wanted but there is still work to do to make it nicer to look at. I am very happy though I was able to get a working email bot to some extent. 
 
+Does the data need to be stored? Not really, the wikipedia page does a good job at that. I can get any of that data from there.
+Can this bot accept input from users? I mean yes, but I am not sure what the criticisms would be aside from that the CSV file looks wonky. Many would want a candidate-centered CSV but that proves very difficult with the way the candidate table is set up on the wikipedia page. I would wait until after the primaries in August when the number of candidates whittles. Whats the best schedule? I put everyday since polls come out nearly every day or every week. I think that suits this. 
+
 
 <End of update>
