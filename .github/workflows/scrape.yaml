@@ -37,13 +37,14 @@ jobs:
           subject: "Daily Voting Intentions"
           body: |
             Hello,
-
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
-
-            {{ pandas.read_csv('./scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}
+            {{ table }}
+            Best regards,
+            Your Name
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
-          attachments: ./scrapers/wikitable/voting_intentions.csv
+          attachments: |
+            ./scrapers/wikitable/voting_intentions.csv
 
       - name: Commit and push changes
         if: always()
