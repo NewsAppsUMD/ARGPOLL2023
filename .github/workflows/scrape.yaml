@@ -1,3 +1,13 @@
+name: Daily Voting Intentions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   scrape_and_email:
     runs-on: ubuntu-latest
