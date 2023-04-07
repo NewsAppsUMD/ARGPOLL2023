@@ -1,52 +1,68 @@
-import requests
-from bs4 import BeautifulSoup
-import pandas as pd
+name: Daily Polling Results
 
-# URL to scrape data from
-url = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2023_Argentine_general_election"
+on:
+  schedule:
+    - cron: "0 12 * * *"
 
-# Send a request to the URL and get the page content
-r = requests.get(url)
-
-# Parse the HTML content of the page using BeautifulSoup
-soup = BeautifulSoup(r.content, "html.parser")
-
-# Find the table with the poll data
-table = soup.find("table", class_="wikitable")
-
-# Extract the column names from the table
-headers = []
-for th in table.find_all("th"):
-    headers.append(th.text.strip())
-
-# Extract the poll data from the table
-poll_data = []
-for tr in table.find_all("tr")[1:]:
-    tds = tr.find_all("td")
-    poll = []
-    for td in tds:
-        poll.append(td.text.strip())
-    poll_data.append(poll)
-
-# Create a pandas dataframe with the poll data and column names
-poll_df = pd.DataFrame(poll_data, columns=headers)
-
-# Convert date column to datetime format
-poll_df["Date"] = pd.to_datetime(poll_df["Date"], format="%d %b %Y")
-
-# Get the latest poll data
-latest_polls = poll_df.sort_values(by="Date", ascending=False).head(4)
-
-# Format the latest poll data as an HTML table
-latest_polls_html = latest_polls.to_html(index=False)
-
-# Remove the new line character from the HTML table
-latest_polls_html = latest_polls_html.replace('\n','')
-
-# Format the HTML table to include borders and alternate row colors
-latest_polls_html = latest_polls_html.replace('<table', '<table style="border-collapse: collapse; border: 1px solid black; font-size: 14px;" cellpadding="10"')
-latest_polls_html = latest_polls_html.replace('<thead>', '<thead style="background-color: #f2f2f2;">')
-latest_polls_html = latest_polls_html.replace('<tbody>', '<tbody style="background-color: #ffffff;">')
-
-# Output the latest poll data as a variable that can be used in the send email step
-print(f'::set-output name=poll_data::{latest_polls_html}')
+jobs:
+  scrape_data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install beautifulsoup4
+          pip install pandas
+      - name: Scrape data
+        run: python scraper.py
+      - name: Upload data
+        uses: actions/upload-artifact@v2
+        with:
+          name: voting_intentions
+          path: ./scrapers/wikitable/voting_intentions.csv
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3.3.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Voting Intentions"
+          body: |
+            <html>
+              <body>
+                <p>Hello,</p>
+                <p>Enclosed you will find the latest polling results for the 2023 Argentine General Election:</p>
+                <table>
+                  <tr>
+                    <th>Polling firm</th>
+                    <th>Date</th>
+                    <th>Party A</th>
+                    <th>Party B</th>
+                    <th>Party C</th>
+                  </tr>
+                  <tbody>
+                    {% for row in data %}
+                    <tr>
+                      <td>{{ row.pollster }}</td>
+                      <td>{{ row.date }}</td>
+                      <td>{{ row.party_a }}</td>
+                      <td>{{ row.party_b }}</td>
+                      <td>{{ row.party_c }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+                <p>Best regards,</p>
+                <p>Ryan Mercado</p>
+              </body>
+            </html>
+          from: mercadoryan94@gmail.com
+          to: mercadoryan94@gmail.com
+          attachments: |
+            ./scrapers/wikitable/voting_intentions.csv
