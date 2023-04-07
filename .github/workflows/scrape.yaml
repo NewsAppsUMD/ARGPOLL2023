@@ -1,8 +1,13 @@
 name: Daily Voting Intentions
 
 on:
-  schedule:
-    - cron: '0 17 * * *' # Run every day at 12 PM EST (5 PM UTC)
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
   
 jobs:
   scrape_and_email:
