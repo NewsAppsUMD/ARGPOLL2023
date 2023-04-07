@@ -1,24 +1,50 @@
 # ARGPOLL2023
 A repository for a web scraper that will scrape poll numbers for the 2023 Argentine General Election
-Update: 4/1/2023
+Update: 4/7/2023
 
-You can see here that I got so frustrated and fed up with my last repository that I made a new one to continue on with this project. The last one unforunately got very confused with the multiple branches I was doing coding on and when it came time to commit changes, the main got confused and asked me to merge changes, something along the lines of that, and I tried, failed, no changes were committed, things were therefore stuck at a standstill, and I got fed up, and started this new repository. 
+FINAL UPDATE :
 
-Anyways, so, as you can see here, I have my scrape.py code, thats the same. The main updates I have for you is that the YAML code is done, it took a lot of trial and error to make but its done. It is NOT the YAML code / github action you saw me do in class. That one failed, so this one here is a new one. 
-Again, thanks to Chat GPT for generating the YAML code, it is a good one, however, right now because I am in the testing stage, it is not set to scrape at certain times as I am still working out the problems with the email function. As you can see in the Github Actions page, I am having trouble sending the actual email. That is a trial and error I am currently going through, but basically once that is done with, I think I will have a complete bot.
+Here is the final code for the scrapper for the polls. As you saw in the sample email I sent to you, I did achieve some things and mostly got a scrapper and email notification I wanted. My only regrest is I wasn't able to make the bot aestheitically pleasing. 
 
-The only problem is that the email that is being sent includes the CSV and is not an Email that would take the CSV results and give it to you in words in an email. Can YAML do that? But can CSV data be made turned into an email format thats understandable? That I still need to figure out. 
-If you have any tips on how to help with emails and passwords, that is very much appreciated. I already setup my email in github repository secrets so thats there. I guess because I am using a google email that github actions is having trouble?
+The CSV that I was able to make is ok, but is isn't perfect. There are some wonky things on there such as the CSV table not taking into account letters with spanish accent marks on them, and outputs them as weird symbols in the CSV. I tried fixing that, but when I did do that, the scraping would not be able to read or output ANY text onto the CSV, so I therefore just left that alone. Please keep in mind that chat GPT was used to craft the scrape.py and YAML codes, to see interactions I had with it, please refer back to the readme.md in the old repository. But suffice to say, it was basically just me posting codes to it, along with error messages and asking it to fix them. If I had any modificiations I would describe them to it and it would add them to the code. That did help with me getting github secrets and connecting my gmail to actually send and recieve those emails sucesfully.  
 
-Test
-Test 2
-Test 3
-test 4
-test 5
- test 6
- test 7
- test
- test
- test
- 
+Another thing is you can see in the CSV that polls with TWO sets of data have their second set aligned to the left on their rows. Its a problem I tried to fix but ultimately that would cause the whole table to shift over when I tried to fix it, so I lef thtat as is too. 
+
+That was a hard process, but that proved to be actually the easier of the two. Creating the YAML code was easy per say, but it was the contexts of the Email that dissapointed me. In the end this is what the email looks like:
+
+"Hello, 
+
+Enclosed you will find the latest polling results for the 2023 Argentine General Election. Please note these results are only measuring poltical party support and not support for any candidate. These results can therefore be read to signify citizen's voting intentions for the Congressional elections and not the Presidential election.
+
+ Best, 
+ -Ryan Mercado
+-CSV FILE ATTACHED-
+
+While thats all ok, its not the best it can be. What I wanted to do was to display the CSV results as a table on the email. That proved to be VERY difficult, and no amount of Chat GPT would work. I tried for hours, going through many many Chat GPT chats, asking it things like:
+
+"I have these two codes, I would like for the email outputed from them to take the results from the CSV and present them in the email as a table, can you do that for me?"
+
+And that led me on a rabbit hole of two days, testing code after code, and getting error after error. I did have some success, such as the email eventually displaying a parcel of the code where the table should have been, but I ultimately could not get a working table on there. I tried the Tabulate library, I tried formatting it as an HTML table, I tried other things that I am forgetting becuase there were many attempts, which are reflected in the many commits I did to test, but none worked.
+
+Ideally, this is what I wanted my email to look like with a working table:
+
+"Hello, 
+
+Enclosed you will find the latest polling results for the 2023 Argentine General Election. Please note these results are only measuring poltical party support and not support for any candidate. These results can therefore be read to signify citizen's voting intentions for the Congressional elections and not the Presidential election.
+
+
+|     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
+|----------------------|--------|------------|------------|------------|
+|   Polling firm 1     | 4/1/23 |     25%    |     30%    |     45%    |
+|   Polling firm 2     | 4/5/23 |     20%    |     40%    |     40%    |
+|   Polling firm 3     | 4/7/23 |     35%    |     25%    |     40%    |
+
+Best regards,
+Ryan Mercado
+
+That is my dream table, and I wasn't able to get it. Don't get me wrong, the CSV file and the little message are ok, but I think for a professional newsroom, the dream email would be better.
+
+So that is where this bot ends. I accomplished most of what I wanted but there is still work to do to make it nicer to look at. I am very happy though I was able to get a working email bot to some extent. 
+
+
 <End of update>
