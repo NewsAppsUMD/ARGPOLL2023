@@ -42,22 +42,19 @@ jobs:
 
             |     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
             |----------------------|--------|------------|------------|------------|
+          run: |
+            csv_data = pd.read_csv('./scrapers/wikitable/voting_intentions.csv')
+            latest_polls = csv_data.tail(4)
+            latest_polls_table = latest_polls[['Polling firm', 'Date', 'Party A', 'Party B', 'Party C']]
+            latest_polls_table = latest_polls_table.to_markdown(index=False, tablefmt='pipe')
+            echo "::set-output name=latest_polls_table::$latest_polls_table"
+          env:
+            PYTHONUNBUFFERED: "1"
 
       - name: Get latest polls table
         id: latest_polls_table
-        run: |
-          csv_data = pd.read_csv('./scrapers/wikitable/voting_intentions.csv')
-          latest_polls = csv_data.tail(4)
-          latest_polls_table = latest_polls[['Polling firm', 'Date', 'Party A', 'Party B', 'Party C']]
-          latest_polls_table = latest_polls_table.to_markdown(index=False, tablefmt='pipe')
-          echo "::set-output name=latest_polls_table::$latest_polls_table"
-        env:
-          PYTHONUNBUFFERED: "1"
-
-      - name: Set latest polls table output
-        run: echo "::set-output name=latest_polls_table::$latest_polls_table"
-        env:
-          latest_polls_table: ${{ steps.send_email.outputs.latest_polls_table }}
+        run: echo "Latest polls table: ${{ steps.send_email.outputs.latest_polls_table }}"
+        shell: bash
 
       - name: Send email with latest polls table
         uses: dawidd6/action-send-mail@v3.3.0
@@ -82,7 +79,7 @@ jobs:
       - name: Commit and push changes
         if: always()
         run: |
-          git config --global user.name "Your Name"
+          git config --global user.name "Ryan Mercado"
           git config --global user.email "mercadoryan94@gmail.com"
           git add .
           git commit -m "Update voting intentions"
