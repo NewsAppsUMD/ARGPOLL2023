@@ -39,7 +39,7 @@ jobs:
             Hello,
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
             
-            {{{ pandas.read_csv('scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}}
+            {{% raw %}```{{ pandas.read_csv('scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}```{% endraw %}
             
             Best regards,
             Your Name
