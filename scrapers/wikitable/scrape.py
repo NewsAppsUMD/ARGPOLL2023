@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import csv
-from tabulate import tabulate
 
 url = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2023_Argentine_general_election#By_political_party_2023"
 response = requests.get(url)
@@ -23,23 +22,23 @@ for th in rows[0].find_all('th'):
 pollster_index = headers.index("Polling firm")
 headers[pollster_index] = "Polling firm"
 
-# extract table data
-data = []
-for row in rows[1:]:
-    if row.find('th'):
-        row_data = [row.find('th').text.strip()]
-    else:
-        row_data = []
-    for td in row.find_all('td'):
-        if td.find('a'):
-            row_data.append(td.find('a').get('title', td.text.strip()))
+# write table headers to CSV file
+with open('voting_intentions.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(headers)
+
+# extract table data and write to CSV file
+with open('voting_intentions.csv', mode='a', newline='') as file:
+    writer = csv.writer(file)
+
+    for row in rows[1:]:
+        if row.find('th'):
+            data = [row.find('th').text.strip()]
         else:
-            row_data.append(td.text.strip())
-    data.append(row_data)
-
-# generate markdown table using tabulate
-table = tabulate(data, headers=headers, tablefmt='pipe')
-
-# write markdown table to file
-with open('voting_intentions.md', mode='w') as file:
-    file.write(table)
+            data = []
+        for td in row.find_all('td'):
+            if td.find('a'):
+                data.append(td.find('a').get('title', td.text.strip()))
+            else:
+                data.append(td.text.strip())
+        writer.writerow(data)
