@@ -1,13 +1,8 @@
 name: Daily Voting Intentions
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+  schedule:
+    - cron: '0 17 * * *' # Run every day at 4:38 PM EST (5 PM UTC)
   
 jobs:
   scrape_and_email:
@@ -15,10 +10,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2.5.0 # Update to Node.js 16
-          
+        uses: actions/checkout@v2
+
       - name: Set up Python
-        uses: actions/setup-python@v2.3.1 # Update to Node.js 16
+        uses: actions/setup-python@v2
         with:
           python-version: '3.x'
 
@@ -29,7 +24,7 @@ jobs:
         run: python scrapers/wikitable/scrape.py
 
       - name: Send email
-        uses: dawidd6/action-send-mail@v3.3.1 # Update to Node.js 16
+        uses: dawidd6/action-send-mail@v3.3.0
         with:
           server_address: smtp.gmail.com
           server_port: 587
@@ -37,7 +32,7 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
           body: "Hello, 
-          Enclosed in the file you will find the latest results for the 2023 Argentine General Election. Please be aware these results are only by political party and not any particular candidate. They therefore can be to signify citizen's voting intentions for Congress and not for President.
+          Enclosed you will find the latest polling results for the 2023 Argentine General Election. Please note that these results or only for political parties and not for any candidate. They therefore can be read to signify citizens' voting intetnions for Congress.
           Best,
           -Ryan Mercado"
           from: mercadoryan94@gmail.com
