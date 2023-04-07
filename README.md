@@ -4,7 +4,7 @@ Update: 4/7/2023
 
 FINAL UPDATE :
 
-PLEASE NOTE THAT WHILE GITHUB ACTIONS SAYS THE ACTIONS FAILED, THAT IS NOT CORRECT. THE EMAIL SENDS CORRECTLY. It only has that failiure notification because some of the libraries or actions in the code need to be updated. I tried updating them but that just messes up the code so I left the code as is. 
+PLEASE NOTE THAT WHILE GITHUB ACTIONS SAYS THE ACTIONS FAILED, THAT IS NOT CORRECT. THE EMAIL SENDS CORRECTLY. It only has that failiure notification because some of the libraries or actions in the code need to be updated. I tried updating them but that just messes up the code so I left the code as is. Again, the email still sends with the CSV, it is fine. 
 
 Here is the final code for the scrapper for the polls. As you saw in the sample email I sent to you, I did achieve some things and mostly got a scrapper and email notification I wanted. My only regrest is I wasn't able to make the bot aestheitically pleasing. 
 
