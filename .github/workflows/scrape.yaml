@@ -22,52 +22,34 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install requests bs4 pandas pandoc
+        run: pip install requests bs4 pandas
 
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
-      - name: Generate HTML table
-        run: |
-          python -c "
-          import pandas as pd
-          from datetime import datetime, timedelta
-          df = pd.read_csv('voting_intentions.csv')
-          df['Poll Date'] = pd.to_datetime(df['Poll Date'], format='%d-%b-%y')
-          mask = (df['Poll Date'] >= datetime.now().date() - timedelta(days=7))
-          df = df.loc[mask].sort_values(by=['Poll Date'], ascending=False).reset_index(drop=True)
-          html_table = pd.DataFrame.to_html(df, index=False)
-          with open('table.html', 'w') as f:
-              f.write(html_table)
-          "
-
-      - name: Convert HTML to Markdown
-        uses: pandoc/core@2.0.4
-        with:
-          from: html
-          to: markdown
-          args: --wrap=none
-          input: ./table.html
-          output: ./table.md
-
       - name: Send email
-        uses: dawidd6/action-send-mail@v2.5.0
+        uses: dawidd6/action-send-mail@v3.3.0
         with:
           server_address: smtp.gmail.com
           server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
+          username: ${{ secrets.EMAIL }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
           body: |
-            Hi,
-            <br><br>
-            Here are the latest daily voting intentions from the past week:
-            <br><br>
-            $(cat table.md)
-            <br><br>
-            Best regards,
-            <br>
-            Your friendly neighborhood bot
-          to: ${{ secrets.EMAIL_RECIPIENT }}
-          from: ${{ secrets.EMAIL_USERNAME }}
-          content_type: text/html
+            Hello,
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election.
+
+            {{ pandas.read_csv('./scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}
+          from: mercadoryan94@gmail.com
+          to: mercadoryan94@gmail.com
+          attachments: ./scrapers/wikitable/voting_intentions.csv
+
+      - name: Commit and push changes
+        if: always()
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "you@example.com"
+          git add .
+          git commit -m "Update voting intentions"
+          git push
