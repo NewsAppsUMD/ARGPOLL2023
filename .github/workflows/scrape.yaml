@@ -41,7 +41,7 @@ jobs:
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
 
             |     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
-            |----------------------|--------|------------|------------|------------|
+
           run: |
             csv_data = pd.read_csv('./scrapers/wikitable/voting_intentions.csv')
             latest_polls = csv_data.tail(4)
