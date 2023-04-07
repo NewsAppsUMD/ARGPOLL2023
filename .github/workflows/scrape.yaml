@@ -38,8 +38,11 @@ jobs:
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Daily Voting Intentions"
           body: "Hello, 
+
           Enclosed you will find the latest polling results for the 2023 Argentine General Election. Please note these results are only measuring poltical party support and not support for any candidate. These results can therefore be read to signify citizen's voting intentions for the Congressional elections and not the Presidential election.
+
           Best,
+          
           -Ryan Mercado"
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
