@@ -22,32 +22,13 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-          pip install requests bs4 pandas
-
-      - name: Start Xvfb
-        run: |
-          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          export DISPLAY=:99
+        run: pip install requests bs4 pandas
 
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
-      - name: Send email
-        uses: dawidd6/action-send-mail@v3.3.0
-        with:
-          server_address: smtp.gmail.com
-          server_port: 587
-          username: ${{ secrets.EMAIL }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "Daily Voting Intentions"
-          body: "Please find attached the latest voting intentions."
-          from: mercadoryan94@gmail.com
-          to: mercadoryan94@gmail.com
-          attachments: |
-            ./scrapers/wikitable/voting_intentions.csv
+      - name: Extract data and format email
+        run: python extract_data_and_send_email.py
 
       - name: Commit and push changes
         if: always()
