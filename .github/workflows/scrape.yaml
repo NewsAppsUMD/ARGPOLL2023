@@ -27,6 +27,22 @@ jobs:
       - name: Scrape data and save to CSV
         run: python scrapers/wikitable/scrape.py
 
+      - name: Send email
+        uses: dawidd6/action-send-mail@v3.3.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Daily Voting Intentions"
+          body: |
+            Hello,
+
+            Enclosed you will find the latest polling results for the 2023 Argentine General Election.
+
+            |     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
+            |----------------------|--------|------------|------------|------------|
+
       - name: Get latest polls table
         id: latest_polls_table
         run: |
@@ -37,7 +53,11 @@ jobs:
           echo "::set-output name=latest_polls_table::$latest_polls_table"
         env:
           PYTHONUNBUFFERED: "1"
-        shell: python
+
+      - name: Set latest polls table output
+        run: echo "::set-output name=latest_polls_table::$latest_polls_table"
+        env:
+          latest_polls_table: ${{ steps.send_email.outputs.latest_polls_table }}
 
       - name: Send email with latest polls table
         uses: dawidd6/action-send-mail@v3.3.0
@@ -62,7 +82,7 @@ jobs:
       - name: Commit and push changes
         if: always()
         run: |
-          git config --global user.name "Ryan"
+          git config --global user.name "Your Name"
           git config --global user.email "mercadoryan94@gmail.com"
           git add .
           git commit -m "Update voting intentions"
