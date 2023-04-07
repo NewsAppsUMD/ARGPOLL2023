@@ -1,45 +1,44 @@
-import csv
-import datetime
 import requests
 from bs4 import BeautifulSoup
+import csv
 
-# specify the URL of the web page
-url = 'https://en.wikipedia.org/wiki/Opinion_polling_for_the_2023_Argentine_general_election'
-
-# send a request to the web page and get its HTML content
+url = "https://en.wikipedia.org/wiki/Opinion_polling_for_the_2023_Argentine_general_election#By_political_party_2023"
 response = requests.get(url)
-html_content = response.content
+soup = BeautifulSoup(response.content, 'html.parser')
 
-# create a BeautifulSoup object to parse the HTML content
-soup = BeautifulSoup(html_content, 'html.parser')
+table = soup.find_all('table')[1] # select the second table on the page
 
-# find the table element that contains the polling data
-table = soup.find('table', class_='wikitable')
+rows = table.find_all('tr')
 
-# get the current month and year
-now = datetime.datetime.now()
-current_month = now.month
-current_year = now.year
+# extract table headers
+headers = []
+for th in rows[0].find_all('th'):
+    if th.find('a'):
+        headers.append(th.find('a')['title'])
+    else:
+        headers.append(th.text.strip())
 
-# create a CSV file and write the header row
-filename = 'polls_{}_{}.csv'.format(current_year, current_month)
-with open(filename, mode='w', newline='') as file:
+# find the index of the "Pollster" column and replace it with "Polling firm"
+pollster_index = headers.index("Pollster")
+headers[pollster_index] = "Polling firm"
+
+# write table headers to CSV file
+with open('voting_intentions.csv', mode='w', newline='') as file:
     writer = csv.writer(file)
-    writer.writerow(['Pollster', 'Date', 'Sample size', 'Approve', 'Disapprove', 'Neutral'])
+    writer.writerow(headers)
 
-    # iterate over the rows in the table
-    rows = table.find_all('tr')
+# extract table data and write to CSV file
+with open('voting_intentions.csv', mode='a', newline='') as file:
+    writer = csv.writer(file)
+
     for row in rows[1:]:
-        # extract the data from each cell in the row
-        cells = row.find_all('td')
-        data = [cell.get_text(strip=True) for cell in cells]
-
-        # extract date and check if it's in the current month
-        print(data)
-        if len(data) > 1:
-            date_str = data[1]
-            date = datetime.datetime.strptime(date_str, '%B %d, %Y')
-            if date.month == current_month:
-                writer.writerow(data)
+        if row.find('th'):
+            data = [row.find('th').text.strip()]
         else:
-            print("Skipping row due to insufficient data: {}".format(data))
+            data = []
+        for td in row.find_all('td'):
+            if td.find('a'):
+                data.append(td.find('a').get('title', td.text.strip()))
+            else:
+                data.append(td.text.strip())
+        writer.writerow(data)
