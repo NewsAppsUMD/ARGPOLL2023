@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-name: Daily Polling Results
+#name: Daily Polling Results
 
 on:
   schedule:
