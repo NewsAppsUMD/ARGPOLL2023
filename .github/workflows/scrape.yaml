@@ -39,7 +39,7 @@ jobs:
             Hello,
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
             
-            `{{ pandas.read_csv('scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}`
+            :{{ pandas.read_csv('scrapers/wikitable/voting_intentions.csv').to_markdown(index=False) }}
             
             Best regards,
             Your Name
@@ -51,8 +51,8 @@ jobs:
       - name: Commit and push changes
         if: always()
         run: |
-          git config --global user.name "Your Name"
-          git config --global user.email "you@example.com"
+          git config --global user.name "Ryan"
+          git config --global user.email "mercadoryan94@gmail.com"
           git add .
           git commit -m "Update voting intentions"
           git push
