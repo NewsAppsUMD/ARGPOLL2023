@@ -40,17 +40,16 @@ jobs:
 
             Enclosed you will find the latest polling results for the 2023 Argentine General Election.
 
-            $(echo -e "|     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
-            |----------------------|--------|------------|------------|------------|")
-            $(tail -n +2 scrapers/wikitable/voting_intentions.csv | sort -r -k2 | awk -F "," 'BEGIN { ORS=""; } NR<=4 { print "|   " $1 "  | " $2 " |     " $3 "%    |     " $4 "%    |     " $5 "%    |\n" }')
-            $(echo -e "")
+            |     Polling firm     |  Date  |   Party A  |   Party B  |   Party C  |
+            |----------------------|--------|------------|------------|------------|
+            $(tail -n +2 scrapers/wikitable/voting_intentions.csv | sort -r -k2 | awk -F "," 'BEGIN { ORS="\n" } NR<=4 { printf("|   %-20s | %-6s | %10s%% | %10s%% | %10s%% |\n", $1, $2, $3, $4, $5) }')
 
             Best regards,
             Ryan Mercado
           from: mercadoryan94@gmail.com
           to: mercadoryan94@gmail.com
           attachments: ''
-          
+
       - name: Commit and push changes
         if: always()
         run: |
